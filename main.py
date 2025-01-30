@@ -80,6 +80,7 @@ while True:
                     sunRect.topleft = (60,50)
             if peashooter_card_rect.collidepoint(mouse_pos) and not dragging_peashooter:
                 print('Peashooter Clicked')
+                peashooter_rect.bottomright = (270,80)
                 if sun_count > 0: 
                     dragging_peashooter = True
                     mouse_x, mouse_y = event.pos
@@ -88,7 +89,6 @@ while True:
             elif dragging_peashooter:
                 if valid_area.collidepoint(mouse_pos):
                     placed_peashooter.append(peashooter_rect.topleft)
-                    peashooter_rect.bottomright = (200,10)
                     dragging_peashooter = False
                     sun_count = sun_count - 100
                     sun_text = font.render(str(sun_count),True,(0,0,0))
