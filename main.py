@@ -49,6 +49,8 @@ ghost_peashooter_img = peashooter_img.copy()
 ghost_peashooter_img.set_alpha(150)
 placed_peashooter = []
 
+valid_area = pygame.Rect(50,100,740,700)
+
 sun = []
 for i in range(5):
     x = random.randrange(0,800)
@@ -78,15 +80,15 @@ while True:
                     sunRect.topleft = (60,50)
             if peashooter_card_rect.collidepoint(mouse_pos) and not dragging_peashooter:
                 print('Peashooter Clicked')
-                if sun_count > 0:
+                if sun_count > 0: 
                     dragging_peashooter = True
                     mouse_x, mouse_y = event.pos
                     offset_x = peashooter_rect.x - mouse_x
                     offset_y = peashooter_rect.y - mouse_y
             elif dragging_peashooter:
-                if 0 <= mouse_pos[0] <= 700 and 0 <= mouse_pos[1] <= 700:
+                if valid_area.collidepoint(mouse_pos):
                     placed_peashooter.append(peashooter_rect.topleft)
-                    peashooter_rect.topleft = (200,10)
+                    peashooter_rect.bottomright = (200,10)
                     dragging_peashooter = False
                     sun_count = sun_count - 100
                     sun_text = font.render(str(sun_count),True,(0,0,0))
@@ -107,6 +109,7 @@ while True:
 
     if dragging_peashooter:
         screen.blit(ghost_peashooter_img,peashooter_rect)
+        pygame.draw.rect(screen, (0,255,0), valid_area,2)
 
     for sun_drop in sun:
         screen.blit(sun_image, (sun_drop[0], sun_drop[1]))
