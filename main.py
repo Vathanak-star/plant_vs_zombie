@@ -1,3 +1,5 @@
+from plants.peashooter import Peashooter
+
 import pygame
 import os
 import random
@@ -78,6 +80,8 @@ for i in range(5):
 
 clock = pygame.time.Clock()
 
+peashooter = Peashooter
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -112,7 +116,8 @@ while True:
                             cell_peashooter_rect = grid[row][col]
                             pos_x = cell_peashooter_rect.centerx - peashooter_img.get_width() // 2
                             pos_y = cell_peashooter_rect.centery - peashooter_img.get_height() // 2
-                            placed_peashooter.append((pos_x,pos_y))
+                            # placed_peashooter.append((pos_x,pos_y))
+                            placed_peashooter.append(Peashooter(pos_x,pos_y,peashooter_img))
                             grid_occupied[row][col] = True
                             dragging_peashooter = False
                             sun_count = sun_count - 100
@@ -122,6 +127,7 @@ while True:
         elif event.type == pygame.MOUSEMOTION and dragging_peashooter:
             mouse_x,mouse_y = event.pos
             peashooter_rect.center = (mouse_x,mouse_y)
+            
 
     screen.blit(background_image,(0,0))
     screen.blit(sun_text,sunRect)
@@ -129,7 +135,8 @@ while True:
     screen.blit(peashooter_card_img,peashooter_card_rect)
 
     for pos in placed_peashooter:
-        screen.blit(peashooter_img, pos)
+        # screen.blit(peashooter_img, pos)
+        pos.show_peashooter_img(screen)
 
     if dragging_peashooter:
         screen.blit(ghost_peashooter_img,peashooter_rect)
