@@ -68,6 +68,8 @@ for row in range(rows):
         )
         grid[row].append(cell_rect)
 
+grid_occupied = [[False for _ in range(columns)] for _ in range(rows)]
+
 sun = []
 for i in range(5):
     x = random.randrange(0,800)
@@ -106,11 +108,12 @@ while True:
             elif dragging_peashooter:
                 for row in range(rows):
                     for col in range(columns):
-                        if grid[row][col].collidepoint(mouse_pos):
+                        if grid[row][col].collidepoint(mouse_pos) and not grid_occupied[row][col]:
                             cell_peashooter_rect = grid[row][col]
                             pos_x = cell_peashooter_rect.centerx - peashooter_img.get_width() // 2
                             pos_y = cell_peashooter_rect.centery - peashooter_img.get_height() // 2
                             placed_peashooter.append((pos_x,pos_y))
+                            grid_occupied[row][col] = True
                             dragging_peashooter = False
                             sun_count = sun_count - 100
                             sun_text = font.render(str(sun_count),True,(0,0,0))
@@ -118,8 +121,6 @@ while True:
                             sunRect.topleft = (60,50)
         elif event.type == pygame.MOUSEMOTION and dragging_peashooter:
             mouse_x,mouse_y = event.pos
-            # peashooter_rect.x = mouse_x + offset_x
-            # peashooter_rect.y = mouse_y + offset_y
             peashooter_rect.center = (mouse_x,mouse_y)
 
     screen.blit(background_image,(0,0))
