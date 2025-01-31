@@ -43,6 +43,9 @@ peashooter_img = pygame.transform.scale(peashooter_img, (70, 70))
 peashooter_rect = peashooter_card_img.get_rect()
 peashooter_rect.center = (200,10)
 
+ammo_img = pygame.image.load(os.path.join(images_dir, 'peashooter_ammo.png')).convert_alpha()
+ammo_img = pygame.transform.scale(ammo_img, (30, 30))
+
 dragging_peashooter = False
 offset_x = 0
 offset_y = 0
@@ -82,6 +85,8 @@ clock = pygame.time.Clock()
 
 peashooter = Peashooter
 
+bullets = []
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -117,7 +122,7 @@ while True:
                             pos_x = cell_peashooter_rect.centerx - peashooter_img.get_width() // 2
                             pos_y = cell_peashooter_rect.centery - peashooter_img.get_height() // 2
                             # placed_peashooter.append((pos_x,pos_y))
-                            placed_peashooter.append(Peashooter(pos_x,pos_y,peashooter_img))
+                            placed_peashooter.append(Peashooter(pos_x,pos_y,peashooter_img,ammo_img))
                             grid_occupied[row][col] = True
                             dragging_peashooter = False
                             sun_count = sun_count - 100
@@ -134,9 +139,19 @@ while True:
     screen.blit(display_text,display_textRect)
     screen.blit(peashooter_card_img,peashooter_card_rect)
 
-    for pos in placed_peashooter:
+    for peashoot in placed_peashooter:
         # screen.blit(peashooter_img, pos)
-        pos.show_peashooter_img(screen)
+        peashoot.show_peashooter_img(screen)
+
+    current_time = pygame.time.get_ticks()
+    for peashoot in placed_peashooter:
+        new_bullets = peashoot.shoot(current_time)
+        if new_bullets:
+            bullets.append(new_bullets)
+
+    for bullet in bullets:
+        bullet.move()
+        bullet.show_ammo_img(screen)
 
     if dragging_peashooter:
         screen.blit(ghost_peashooter_img,peashooter_rect)
