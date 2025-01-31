@@ -26,6 +26,7 @@ base_dir = os.path.dirname(__file__)
 assets_dir = os.path.join(base_dir, 'assets')
 images_dir = os.path.join(assets_dir, 'images')
 
+#gameplay background image
 background_image = pygame.image.load(os.path.join(images_dir, 'pvz_background.jpg')).convert()
 background_image = pygame.transform.scale(background_image, (800, 800))
 sun_image = pygame.image.load(os.path.join(images_dir,'sun.png')).convert_alpha()
@@ -43,6 +44,7 @@ peashooter_img = pygame.transform.scale(peashooter_img, (70, 70))
 peashooter_rect = peashooter_card_img.get_rect()
 peashooter_rect.center = (200,10)
 
+#peashooter ammo or bullet
 ammo_img = pygame.image.load(os.path.join(images_dir, 'peashooter_ammo.png')).convert_alpha()
 ammo_img = pygame.transform.scale(ammo_img, (30, 30))
 
@@ -54,6 +56,30 @@ ghost_peashooter_img = peashooter_img.copy()
 ghost_peashooter_img.set_alpha(150)
 placed_peashooter = []
 
+
+#sunflower Card
+sunflower_card_img = pygame.image.load(os.path.join(images_dir,'sunflower_card_img.jpg')).convert_alpha()
+sunflower_card_img = pygame.transform.scale(sunflower_card_img, (80,80))
+sunflower_card_rect = sunflower_card_img.get_rect()
+sunflower_card_rect.topleft = (300,10)
+
+
+#sunflower Image
+sunflower_img = pygame.image.load(os.path.join(images_dir,'sunflower_img.png')).convert_alpha()
+sunflower_img = pygame.transform.scale(sunflower_img, (70,70))
+sunflower_rect = sunflower_img.get_rect()
+sunflower_rect.center = (300,10)
+
+dragging_sunflower = False
+offset_sunflower_x = 0
+offset_sunflower_y = 0
+
+ghost_sunflower_img = sunflower_img.copy()
+ghost_sunflower_img.set_alpha(150)
+placed_sunflower = []
+
+
+#doing row and colunms to create cell
 valid_area = pygame.Rect(50,100,740,700)
 
 rows = 5
@@ -106,6 +132,7 @@ while True:
                     sun_text = font.render(str(sun_count),True,(0,0,0))
                     sunRect = sun_text.get_rect()
                     sunRect.topleft = (60,50)
+            #peashooter
             if peashooter_card_rect.collidepoint(mouse_pos) and not dragging_peashooter:
                 print('Peashooter Clicked')
                 peashooter_rect.bottomright = (270,80)
@@ -129,19 +156,52 @@ while True:
                             sun_text = font.render(str(sun_count),True,(0,0,0))
                             sunRect = sun_text.get_rect()
                             sunRect.topleft = (60,50)
+            #sunflower
+            if sunflower_card_rect.collidepoint(mouse_pos) and not dragging_sunflower:
+                print('Sunflower Clicked')
+                sunflower_rect.bottomright = (370,80)
+                if sun_count > 0:
+                    dragging_sunflower = True
+                    mouse_sun_x, mouse_sun_y = event.pos
+                    offset_sunflower_x = sunflower_rect.x - mouse_sun_x // 2
+                    offset_sunflower_y = sunflower_rect.y - mouse_sun_y // 2
+            elif dragging_sunflower:
+                for row in range(rows):
+                    for col in range(columns):
+                        if grid[row][col].collidepoint(mouse_pos) and not grid_occupied[row][col]:
+                            cell_sunflower_rect = grid[row][col]
+                            pos_sun_x = cell_sunflower_rect.centerx - sunflower_img.get_width() // 2
+                            pos_sun_y = cell_sunflower_rect.centery - sunflower_img.get_height() // 2
+                            placed_sunflower.append((pos_sun_x,pos_sun_y))
+                            grid_occupied[row][col] = True
+                            dragging_sunflower = False
+                            sun_count = sun_count - 100
+                            sun_text = font.render(str(sun_count),True,(0,0,0))
+                            sunRect = sun_text.get_rect()
+                            sunRect.topleft = (60,50)
+
+        #peashooter_motion
         elif event.type == pygame.MOUSEMOTION and dragging_peashooter:
             mouse_x,mouse_y = event.pos
             peashooter_rect.center = (mouse_x,mouse_y)
+        #sunflower_motion
+        elif event.type == pygame.MOUSEMOTION and dragging_sunflower:
+            mouse_sun_x, mouse_sun_y = event.pos
+            sunflower_rect.center = (mouse_sun_x,mouse_sun_y)
             
 
     screen.blit(background_image,(0,0))
     screen.blit(sun_text,sunRect)
     screen.blit(display_text,display_textRect)
     screen.blit(peashooter_card_img,peashooter_card_rect)
+    screen.blit(sunflower_card_img,sunflower_card_rect)
 
     for peashoot in placed_peashooter:
-        # screen.blit(peashooter_img, pos)
+        # screen.blit(peashooter_img, peashoot)
         peashoot.show_peashooter_img(screen)
+
+    for sunflower in placed_sunflower:
+        screen.blit(sunflower_img, sunflower)
 
     current_time = pygame.time.get_ticks()
     for peashoot in placed_peashooter:
@@ -155,6 +215,12 @@ while True:
 
     if dragging_peashooter:
         screen.blit(ghost_peashooter_img,peashooter_rect)
+        for row in range(rows):
+            for col in range(columns):
+                pygame.draw.rect(screen, (0,255,0), grid[row][col],1)
+
+    if dragging_sunflower:
+        screen.blit(ghost_sunflower_img,sunflower_rect)
         for row in range(rows):
             for col in range(columns):
                 pygame.draw.rect(screen, (0,255,0), grid[row][col],1)
