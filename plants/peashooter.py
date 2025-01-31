@@ -17,7 +17,7 @@ class Peashooter:
     def shoot(self,current_time):
         if current_time - self.last_shot_time > self.shot_cooldown:
             self.last_shot_time = current_time
-            return Bullet(self.x + self.width, self.y + self.height // 2,self.ammo_img)
+            return Bullet(self.x + self.width, self.y + self.height // 22,self.ammo_img)
         return None
 
 class Bullet:
