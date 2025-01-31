@@ -1,4 +1,5 @@
 from plants.peashooter import Peashooter
+from plants.sunflower import Sunflower
 
 import pygame
 import os
@@ -77,6 +78,7 @@ offset_sunflower_y = 0
 ghost_sunflower_img = sunflower_img.copy()
 ghost_sunflower_img.set_alpha(150)
 placed_sunflower = []
+active_suns = []
 
 
 #doing row and colunms to create cell
@@ -172,7 +174,8 @@ while True:
                             cell_sunflower_rect = grid[row][col]
                             pos_sun_x = cell_sunflower_rect.centerx - sunflower_img.get_width() // 2
                             pos_sun_y = cell_sunflower_rect.centery - sunflower_img.get_height() // 2
-                            placed_sunflower.append((pos_sun_x,pos_sun_y))
+                            # placed_sunflower.append((pos_sun_x,pos_sun_y))
+                            placed_sunflower.append(Sunflower(pos_sun_x,pos_sun_y,sunflower_img,sun_image))
                             grid_occupied[row][col] = True
                             dragging_sunflower = False
                             sun_count = sun_count - 100
@@ -200,9 +203,6 @@ while True:
         # screen.blit(peashooter_img, peashoot)
         peashoot.show_peashooter_img(screen)
 
-    for sunflower in placed_sunflower:
-        screen.blit(sunflower_img, sunflower)
-
     current_time = pygame.time.get_ticks()
     for peashoot in placed_peashooter:
         new_bullets = peashoot.shoot(current_time)
@@ -212,6 +212,20 @@ while True:
     for bullet in bullets:
         bullet.move()
         bullet.show_ammo_img(screen)
+
+    for sunflower in placed_sunflower:
+        # screen.blit(sunflower_img, sunflower)
+        sunflower.show_sunflower_img(screen)
+
+    for sunflower in placed_sunflower:
+        new_sun = sunflower.produce_sun(current_time)
+        if new_sun:
+            active_suns.append(new_sun)
+    
+    for suns in active_suns:
+        suns.move()
+        suns.show_sun_img(screen)
+
 
     if dragging_peashooter:
         screen.blit(ghost_peashooter_img,peashooter_rect)
