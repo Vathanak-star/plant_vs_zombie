@@ -10,17 +10,12 @@ pygame.init()
 #Set up screen
 screen = pygame.display.set_mode((800,800))
 pygame.display.set_caption('Plant Vs Zombie')
-font = pygame.font.SysFont('inkfree',30,italic=True,bold=True)
-
-display_text = 'Sun Count: '
-display_text = font.render(display_text,True,(0,0,0))
-display_textRect = display_text.get_rect()
-display_textRect.topleft = (20,20)
+font = pygame.font.SysFont('comicsansms',20,bold=True)
 
 sun_count = 0
 sun_text = font.render(str(sun_count),True,(0,0,0))
 sunRect = sun_text.get_rect()
-sunRect.topleft = (60,50)
+sunRect.topleft = (35,67)
 
 #Define Paths to the image
 base_dir = os.path.dirname(__file__)
@@ -30,8 +25,15 @@ images_dir = os.path.join(assets_dir, 'images')
 #gameplay background image
 background_image = pygame.image.load(os.path.join(images_dir, 'pvz_background.jpg')).convert()
 background_image = pygame.transform.scale(background_image, (800, 800))
+
 sun_image = pygame.image.load(os.path.join(images_dir,'sun.png')).convert_alpha()
 sun_image = pygame.transform.scale(sun_image, (40,40))
+
+#woodboard pvz
+woodboard_img = pygame.image.load(os.path.join(images_dir,'woodboard_pvz.png')).convert_alpha()
+woodboard_img = pygame.transform.scale(woodboard_img,(550,100))
+woodboard_rect = woodboard_img.get_rect()
+woodboard_rect.topleft = (0,0)
 
 #Peashooter_card
 peashooter_card_img = pygame.image.load(os.path.join(images_dir, 'peashooter_card_image.jpg')).convert()
@@ -125,7 +127,7 @@ while True:
             for sun_drop in sun[:]:
                 sun_rect = pygame.Rect(sun_drop[0] , sun_drop[1], 35, 35)
                 if sun_rect.collidepoint(mouse_pos):
-                    sun_count = sun_count + 100
+                    sun_count = sun_count + 50
                     print(sun_count)
                     sun.remove(sun_drop) 
                     x = random.randrange(0,800)
@@ -133,12 +135,37 @@ while True:
                     sun.append([x,y])
                     sun_text = font.render(str(sun_count),True,(0,0,0))
                     sunRect = sun_text.get_rect()
-                    sunRect.topleft = (60,50)
+                    if sun_count == 0:
+                        sunRect.topleft = (35,67)
+                    elif sun_count > 0 and sun_count < 100:
+                        sunRect.topleft = (30,67)
+                    elif sun_count >= 100 and sun_count < 1000:
+                        sunRect.topleft = (24,67)
+                    elif sun_count >= 1000:
+                        sunRect.topleft = (19,67)
+
+            for active_sun_drop in active_suns[:]:
+                active_sun_rect = pygame.Rect(active_sun_drop.x, active_sun_drop.y, 35,35)
+                if active_sun_rect.collidepoint(mouse_pos):
+                    active_suns.remove(active_sun_drop)
+                    sun_count = sun_count + 50
+                    print(sun_count)
+                    sun_text = font.render(str(sun_count),True,(0,0,0))
+                    sunRect = sun_text.get_rect()
+                    if sun_count == 0:
+                        sunRect.topleft = (35,67)
+                    elif sun_count > 0 and sun_count < 100:
+                        sunRect.topleft = (30,67)
+                    elif sun_count >= 100 and sun_count < 1000:
+                        sunRect.topleft = (24,67)
+                    elif sun_count >= 1000:
+                        sunRect.topleft = (19,67)
+            
             #peashooter
             if peashooter_card_rect.collidepoint(mouse_pos) and not dragging_peashooter:
                 print('Peashooter Clicked')
                 peashooter_rect.bottomright = (270,80)
-                if sun_count > 0: 
+                if sun_count >= 100: 
                     dragging_peashooter = True
                     mouse_x, mouse_y = event.pos
                     offset_x = peashooter_rect.x - mouse_x // 2
@@ -157,12 +184,19 @@ while True:
                             sun_count = sun_count - 100
                             sun_text = font.render(str(sun_count),True,(0,0,0))
                             sunRect = sun_text.get_rect()
-                            sunRect.topleft = (60,50)
+                            if sun_count == 0:
+                                sunRect.topleft = (35,67)
+                            elif sun_count > 0 and sun_count < 100:
+                                sunRect.topleft = (30,67)
+                            elif sun_count >= 100 and sun_count < 1000:
+                                sunRect.topleft = (24,67)
+                            elif sun_count >= 1000:
+                                sunRect.topleft = (19,67)
             #sunflower
             if sunflower_card_rect.collidepoint(mouse_pos) and not dragging_sunflower:
                 print('Sunflower Clicked')
                 sunflower_rect.bottomright = (370,80)
-                if sun_count > 0:
+                if sun_count > 50:
                     dragging_sunflower = True
                     mouse_sun_x, mouse_sun_y = event.pos
                     offset_sunflower_x = sunflower_rect.x - mouse_sun_x // 2
@@ -181,7 +215,14 @@ while True:
                             sun_count = sun_count - 100
                             sun_text = font.render(str(sun_count),True,(0,0,0))
                             sunRect = sun_text.get_rect()
-                            sunRect.topleft = (60,50)
+                            if sun_count == 0:
+                                sunRect.topleft = (35,67)
+                            elif sun_count > 0 and sun_count < 100:
+                                sunRect.topleft = (30,67)
+                            elif sun_count >= 100 and sun_count < 1000:
+                                sunRect.topleft = (24,67)
+                            elif sun_count >= 1000:
+                                sunRect.topleft = (19,67)
 
         #peashooter_motion
         elif event.type == pygame.MOUSEMOTION and dragging_peashooter:
@@ -194,8 +235,8 @@ while True:
             
 
     screen.blit(background_image,(0,0))
+    screen.blit(woodboard_img,woodboard_rect)
     screen.blit(sun_text,sunRect)
-    screen.blit(display_text,display_textRect)
     screen.blit(peashooter_card_img,peashooter_card_rect)
     screen.blit(sunflower_card_img,sunflower_card_rect)
 

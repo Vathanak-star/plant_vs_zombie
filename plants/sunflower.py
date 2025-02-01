@@ -9,7 +9,7 @@ class Sunflower:
         self.sun_img = sun_img
         self.last_sun_time = 0
         self.sun_cooldown = 5000
-        self.fall_range = 80
+        self.fall_range = 70
 
     def show_sunflower_img(self,screen):
         screen.blit(self.sunflower_img, (self.x,self.y))
