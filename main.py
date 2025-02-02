@@ -1,5 +1,6 @@
 from plants.peashooter import Peashooter
 from plants.sunflower import Sunflower
+from plants.wallnut import Wallnut
 
 import pygame
 import os
@@ -289,7 +290,8 @@ while True:
                             cell_wallnut_rect = grid[row][col]
                             pos_wall_x = cell_wallnut_rect.centerx - wallnut_img.get_width() // 2
                             pos_wall_y = cell_wallnut_rect.centery - wallnut_img.get_height() // 2
-                            placed_wallnut.append((pos_wall_x,pos_wall_y))
+                            # placed_wallnut.append((pos_wall_x,pos_wall_y))
+                            placed_wallnut.append(Wallnut(pos_wall_x,pos_wall_y,wallnut_img))
                             grid_occupied[row][col] = True
                             dragging_wallnut = False
                             sun_count = sun_count -  50
@@ -336,7 +338,8 @@ while True:
 
     #wallnut
     for wallnut in placed_wallnut:
-        screen.blit(wallnut_img,wallnut)
+        # screen.blit(wallnut_img,wallnut)
+        wallnut.show_wallnut_img(screen)
 
     #sunflower
     for sunflower in placed_sunflower:
