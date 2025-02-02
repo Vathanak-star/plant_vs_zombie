@@ -36,10 +36,10 @@ woodboard_rect = woodboard_img.get_rect()
 woodboard_rect.topleft = (0,0)
 
 #Peashooter_card
-peashooter_card_img = pygame.image.load(os.path.join(images_dir, 'peashooter_card_image.jpg')).convert()
-peashooter_card_img = pygame.transform.scale(peashooter_card_img, (80, 80))
+peashooter_card_img = pygame.image.load(os.path.join(images_dir, 'peashooter_card_image.png')).convert()
+peashooter_card_img = pygame.transform.scale(peashooter_card_img, (55, 75))
 peashooter_card_rect = peashooter_card_img.get_rect()
-peashooter_card_rect.topleft = (200,10)
+peashooter_card_rect.topleft = (90,12)
 
 #peashooter
 peashooter_img = pygame.image.load(os.path.join(images_dir, 'peashooter.png')).convert_alpha()
@@ -61,10 +61,10 @@ placed_peashooter = []
 
 
 #sunflower Card
-sunflower_card_img = pygame.image.load(os.path.join(images_dir,'sunflower_card_img.jpg')).convert_alpha()
-sunflower_card_img = pygame.transform.scale(sunflower_card_img, (80,80))
+sunflower_card_img = pygame.image.load(os.path.join(images_dir,'sunflower_card_img.png')).convert_alpha()
+sunflower_card_img = pygame.transform.scale(sunflower_card_img, (55,75))
 sunflower_card_rect = sunflower_card_img.get_rect()
-sunflower_card_rect.topleft = (300,10)
+sunflower_card_rect.topleft = (155,12)
 
 
 #sunflower Image
@@ -81,6 +81,54 @@ ghost_sunflower_img = sunflower_img.copy()
 ghost_sunflower_img.set_alpha(150)
 placed_sunflower = []
 active_suns = []
+
+#wallnut card & plant
+wallnut_card_img = pygame.image.load(os.path.join(images_dir,'wallnut_card_imge.png'))
+wallnut_card_img = pygame.transform.scale(wallnut_card_img,(55,75))
+wallnut_card_rect = wallnut_card_img.get_rect()
+wallnut_card_rect.topleft = (220,12)
+
+wallnut_img = pygame.image.load(os.path.join(images_dir, 'wallnut_img.png')).convert_alpha()
+wallnut_img = pygame.transform.scale(wallnut_img, (70, 70))
+wallnut_rect = wallnut_img.get_rect()
+wallnut_rect.center = (220,12)
+
+dragging_wallnut = False
+offset_wallnut_x = 0
+offset_wallnut_y = 0
+
+ghost_wallnut_img = wallnut_img.copy()
+ghost_wallnut_img.set_alpha(150)
+placed_wallnut = []
+
+#lawn mowing car
+lawn_car_img = pygame.image.load(os.path.join(images_dir,'lawn_mowing.png'))
+lawn_car_img = pygame.transform.scale(lawn_car_img,(60,60))
+
+lawn_car_rect1 = lawn_car_img.get_rect()
+lawn_car_rect1.topleft = (0,150)
+
+lawn_car_rect2 = lawn_car_img.get_rect()
+lawn_car_rect2.topleft = (0,290)
+
+lawn_car_rect3 = lawn_car_img.get_rect()
+lawn_car_rect3.topleft = (-5,420)
+
+lawn_car_rect4 = lawn_car_img.get_rect()
+lawn_car_rect4.topleft = (-10,570)
+
+lawn_car_rect5 = lawn_car_img.get_rect()
+lawn_car_rect5.topleft = (-15,710)
+
+shovel_card_img = pygame.image.load(os.path.join(images_dir,'shovel.png')).convert_alpha()
+shovel_card_img = pygame.transform.scale(shovel_card_img, (55,75))
+shovel_card_rect = shovel_card_img.get_rect()
+shovel_card_rect.topleft = (550,3)
+
+menu_card_img = pygame.image.load(os.path.join(images_dir,'menu.png')).convert_alpha()
+menu_card_img = pygame.transform.scale(menu_card_img, (60,60))
+menu_card_rect = menu_card_img.get_rect()
+menu_card_rect.topleft = (740,3)
 
 
 #doing row and colunms to create cell
@@ -164,7 +212,7 @@ while True:
             #peashooter
             if peashooter_card_rect.collidepoint(mouse_pos) and not dragging_peashooter:
                 print('Peashooter Clicked')
-                peashooter_rect.bottomright = (270,80)
+                peashooter_rect.bottomright = (130,80)
                 if sun_count >= 100: 
                     dragging_peashooter = True
                     mouse_x, mouse_y = event.pos
@@ -195,8 +243,8 @@ while True:
             #sunflower
             if sunflower_card_rect.collidepoint(mouse_pos) and not dragging_sunflower:
                 print('Sunflower Clicked')
-                sunflower_rect.bottomright = (370,80)
-                if sun_count > 50:
+                sunflower_rect.bottomright = (220,80)
+                if sun_count >= 50:
                     dragging_sunflower = True
                     mouse_sun_x, mouse_sun_y = event.pos
                     offset_sunflower_x = sunflower_rect.x - mouse_sun_x // 2
@@ -212,7 +260,39 @@ while True:
                             placed_sunflower.append(Sunflower(pos_sun_x,pos_sun_y,sunflower_img,sun_image))
                             grid_occupied[row][col] = True
                             dragging_sunflower = False
-                            sun_count = sun_count - 100
+                            sun_count = sun_count -  50
+                            sun_text = font.render(str(sun_count),True,(0,0,0))
+                            sunRect = sun_text.get_rect()
+                            if sun_count == 0:
+                                sunRect.topleft = (35,67)
+                            elif sun_count > 0 and sun_count < 100:
+                                sunRect.topleft = (30,67)
+                            elif sun_count >= 100 and sun_count < 1000:
+                                sunRect.topleft = (24,67)
+                            elif sun_count >= 1000:
+                                sunRect.topleft = (19,67)
+
+            #wallnut
+
+            if wallnut_card_rect.collidepoint(mouse_pos) and not dragging_wallnut:
+                print('Wallnut Clicked')
+                wallnut_rect.bottomright = (280,80)
+                if sun_count >= 50:
+                    dragging_wallnut = True
+                    mouse_wall_x, mouse_wall_y = event.pos
+                    offset_wallnut_x = wallnut_rect.x - mouse_wall_x // 2
+                    offset_wallnut_y = wallnut_rect.y - mouse_wall_y // 2
+            elif dragging_wallnut:
+                for row in range(rows):
+                    for col in range(columns):
+                        if grid[row][col].collidepoint(mouse_pos) and not grid_occupied[row][col]:
+                            cell_wallnut_rect = grid[row][col]
+                            pos_wall_x = cell_wallnut_rect.centerx - wallnut_img.get_width() // 2
+                            pos_wall_y = cell_wallnut_rect.centery - wallnut_img.get_height() // 2
+                            placed_wallnut.append((pos_wall_x,pos_wall_y))
+                            grid_occupied[row][col] = True
+                            dragging_wallnut = False
+                            sun_count = sun_count -  50
                             sun_text = font.render(str(sun_count),True,(0,0,0))
                             sunRect = sun_text.get_rect()
                             if sun_count == 0:
@@ -232,13 +312,45 @@ while True:
         elif event.type == pygame.MOUSEMOTION and dragging_sunflower:
             mouse_sun_x, mouse_sun_y = event.pos
             sunflower_rect.center = (mouse_sun_x,mouse_sun_y)
+        #wallnut motion
+        elif event.type == pygame.MOUSEMOTION and dragging_wallnut:
+            mouse_wall_x, mouse_wall_y = event.pos
+            wallnut_rect.center = (mouse_wall_x,mouse_wall_y)
             
 
     screen.blit(background_image,(0,0))
     screen.blit(woodboard_img,woodboard_rect)
     screen.blit(sun_text,sunRect)
-    screen.blit(peashooter_card_img,peashooter_card_rect)
     screen.blit(sunflower_card_img,sunflower_card_rect)
+    screen.blit(wallnut_card_img,wallnut_card_rect)
+    screen.blit(peashooter_card_img,peashooter_card_rect)
+
+    screen.blit(lawn_car_img,lawn_car_rect1)
+    screen.blit(lawn_car_img,lawn_car_rect2)
+    screen.blit(lawn_car_img,lawn_car_rect3)
+    screen.blit(lawn_car_img,lawn_car_rect4)
+    screen.blit(lawn_car_img,lawn_car_rect5)
+
+    screen.blit(shovel_card_img,shovel_card_rect)
+    screen.blit(menu_card_img,menu_card_rect)
+
+    #wallnut
+    for wallnut in placed_wallnut:
+        screen.blit(wallnut_img,wallnut)
+
+    #sunflower
+    for sunflower in placed_sunflower:
+        # screen.blit(sunflower_img, sunflower)
+        sunflower.show_sunflower_img(screen)
+
+    for sunflower in placed_sunflower:
+        new_sun = sunflower.produce_sun(current_time)
+        if new_sun:
+            active_suns.append(new_sun)
+    
+    for suns in active_suns:
+        suns.move()
+        suns.show_sun_img(screen)
 
     for peashoot in placed_peashooter:
         # screen.blit(peashooter_img, peashoot)
@@ -254,19 +366,6 @@ while True:
         bullet.move()
         bullet.show_ammo_img(screen)
 
-    for sunflower in placed_sunflower:
-        # screen.blit(sunflower_img, sunflower)
-        sunflower.show_sunflower_img(screen)
-
-    for sunflower in placed_sunflower:
-        new_sun = sunflower.produce_sun(current_time)
-        if new_sun:
-            active_suns.append(new_sun)
-    
-    for suns in active_suns:
-        suns.move()
-        suns.show_sun_img(screen)
-
 
     if dragging_peashooter:
         screen.blit(ghost_peashooter_img,peashooter_rect)
@@ -276,6 +375,12 @@ while True:
 
     if dragging_sunflower:
         screen.blit(ghost_sunflower_img,sunflower_rect)
+        for row in range(rows):
+            for col in range(columns):
+                pygame.draw.rect(screen, (0,255,0), grid[row][col],1)
+
+    if dragging_wallnut:
+        screen.blit(ghost_wallnut_img,wallnut_rect)
         for row in range(rows):
             for col in range(columns):
                 pygame.draw.rect(screen, (0,255,0), grid[row][col],1)
