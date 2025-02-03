@@ -2,6 +2,8 @@ from plants.peashooter import Peashooter
 from plants.sunflower import Sunflower
 from plants.wallnut import Wallnut
 
+from zombie.normal_zombie import NormalZombie
+
 import pygame
 import os
 import random
@@ -17,7 +19,7 @@ sun_count = 0
 sun_text = font.render(str(sun_count),True,(0,0,0))
 sunRect = sun_text.get_rect()
 sunRect.topleft = (35,67)
-
+ 
 #Define Paths to the image
 base_dir = os.path.dirname(__file__)
 assets_dir = os.path.join(base_dir, 'assets')
@@ -165,7 +167,7 @@ for row in range(rows):
         )
         grid[row].append(cell_rect)
 
-grid_occupied = [[False for _ in range(columns)] for _ in range(rows)]
+grid_occupied = [[None for _ in range(columns)] for _ in range(rows)]
 
 sun = []
 for i in range(1):
@@ -178,6 +180,12 @@ clock = pygame.time.Clock()
 peashooter = Peashooter
 
 bullets = []
+
+#zombie
+normal_zombie_img = pygame.image.load(os.path.join(images_dir,'normal_zombie.png'))
+normal_zombie_img = pygame.transform.scale(normal_zombie_img,(70,70))
+
+normal_zombie = []
 
 while True:
     for event in pygame.event.get():
@@ -233,7 +241,7 @@ while True:
             elif dragging_peashooter:
                 for row in range(rows):
                     for col in range(columns):
-                        if grid[row][col].collidepoint(mouse_pos) and not grid_occupied[row][col]:
+                        if grid[row][col].collidepoint(mouse_pos) and grid_occupied[row][col] is None:
                             cell_peashooter_rect = grid[row][col]
                             pos_x = cell_peashooter_rect.centerx - peashooter_img.get_width() // 2
                             pos_y = cell_peashooter_rect.centery - peashooter_img.get_height() // 2
@@ -254,6 +262,7 @@ while True:
                             elif sun_count >= 1000:
                                 sunRect.topleft = (19,67)
             #sunflower
+
             if sunflower_card_rect.collidepoint(mouse_pos) and not dragging_sunflower:
                 print('Sunflower Clicked')
                 sunflower_rect.bottomright = (220,80)
@@ -263,7 +272,7 @@ while True:
             elif dragging_sunflower:
                 for row in range(rows):
                     for col in range(columns):
-                        if grid[row][col].collidepoint(mouse_pos) and not grid_occupied[row][col]:
+                        if grid[row][col].collidepoint(mouse_pos) and grid_occupied[row][col] is None:
                             cell_sunflower_rect = grid[row][col]
                             pos_sun_x = cell_sunflower_rect.centerx - sunflower_img.get_width() // 2
                             pos_sun_y = cell_sunflower_rect.centery - sunflower_img.get_height() // 2
@@ -294,7 +303,7 @@ while True:
             elif dragging_wallnut:
                 for row in range(rows):
                     for col in range(columns):
-                        if grid[row][col].collidepoint(mouse_pos) and not grid_occupied[row][col]:
+                        if grid[row][col].collidepoint(mouse_pos) and grid_occupied[row][col] is None:
                             cell_wallnut_rect = grid[row][col]
                             pos_wall_x = cell_wallnut_rect.centerx - wallnut_img.get_width() // 2
                             pos_wall_y = cell_wallnut_rect.centery - wallnut_img.get_height() // 2
@@ -318,13 +327,14 @@ while True:
             #shovel
             if shovel_card_rect.collidepoint(mouse_pos) and not dragging_shovel:
                 print('Shovel Clicked')
-                shovel_rect.bottomright = (700,80)
+                shovel_rect.bottomright = (610,80)
                 dragging_shovel = True
                 mouse_shovel_x, mouse_shovel_y = event.pos
             elif dragging_shovel:
                 for row in range(rows):
                     for col in range(columns):
                         if grid[row][col].collidepoint(mouse_pos):
+                            clicked_cell = True
                             if grid_occupied[row][col] is not None:
                                 plant_to_remove = grid_occupied[row][col]
                                 if plant_to_remove is not None:
@@ -333,8 +343,11 @@ while True:
                                     grid_occupied[row][col] = None
                                     dragging_shovel = False
                                     shovel_rect.bottomright = (offset_shovel_x,offset_shovel_y)
+                                    break
                     else:
-                        continue
+                        shovel_rect.bottomright = (offset_shovel_x,offset_shovel_y)
+                        dragging_shovel = False
+                        break
                     break
 
                                     
@@ -351,7 +364,7 @@ while True:
         elif event.type == pygame.MOUSEMOTION and dragging_wallnut:
             mouse_wall_x, mouse_wall_y = event.pos
             wallnut_rect.center = (mouse_wall_x,mouse_wall_y)
-
+        #shovel motion
         elif event.type == pygame.MOUSEMOTION and dragging_shovel:
             mouse_shovel_x,mouse_shovel_y = event.pos
             shovel_rect.center = (mouse_shovel_x,mouse_shovel_y)
@@ -374,6 +387,8 @@ while True:
     screen.blit(menu_card_img,menu_card_rect)
 
     current_time = pygame.time.get_ticks()
+
+
 
     #wallnut
     for plant in plants:
@@ -399,29 +414,83 @@ while True:
         bullet.move()
         bullet.show_ammo_img(screen)
 
+    if random.randint(0,50) == 0:
+        row = random.randint(0, rows-1)
+
+        cell_height = valid_area.height // rows
+        spawn_y = valid_area.y + row * cell_height + (cell_height - 115)
+
+        spawn_x = valid_area.right
+        normal_zombie.append(NormalZombie(spawn_x,spawn_y,normal_zombie_img))
+
+    for zombie in normal_zombie:
+        zombie.zombie_move()
+        zombie.show_zombie_img(screen)
+
+    for zombie in normal_zombie:
+        for bullet in bullets:
+            if zombie.x < bullet.x < zombie.x + zombie.width and zombie.y < bullet.y < zombie.y + zombie.height:
+                zombie.health -= 20
+                bullets.remove(bullet)
+                if zombie.health == 0:
+                    normal_zombie.remove(zombie)
+                    break
+
+    for zombie in normal_zombie:
+        zombie.is_moving = True
+        for plant in plants:
+            if zombie.rect.colliderect(plant.rect):
+                zombie.is_moving = False
+                plant.health -= 20
+                if plant.health == 0:
+                    plants.remove(plant)
+                    for row in range(rows):
+                        for col in range(columns):
+                            grid_occupied[row][col] = None
+                    zombie.is_moving = True
+                break
+
+
+
     if dragging_peashooter:
         screen.blit(ghost_peashooter_img,peashooter_rect)
         for row in range(rows):
             for col in range(columns):
-                pygame.draw.rect(screen, (0,255,0), grid[row][col],1)
+                cell_rect = grid[row][col]
+                if grid_occupied[row][col] is None:
+                    pygame.draw.rect(screen, (0,255,0), cell_rect,1)
+                else:
+                    pygame.draw.rect(screen, (255,0,0), cell_rect,1)
 
     if dragging_sunflower:
         screen.blit(ghost_sunflower_img,sunflower_rect)
         for row in range(rows):
             for col in range(columns):
-                pygame.draw.rect(screen, (0,255,0), grid[row][col],1)
+                cell_rect = grid[row][col]
+                if grid_occupied[row][col] is None:
+                    pygame.draw.rect(screen, (0,255,0), cell_rect,1)
+                else:
+                    pygame.draw.rect(screen, (255,0,0), cell_rect,1)
 
     if dragging_wallnut:
         screen.blit(ghost_wallnut_img,wallnut_rect)
         for row in range(rows):
             for col in range(columns):
-                pygame.draw.rect(screen, (0,255,0), grid[row][col],1)
+                cell_rect = grid[row][col]
+                if grid_occupied[row][col] is None:
+                    pygame.draw.rect(screen, (0,255,0), cell_rect,1)
+                else:
+                    pygame.draw.rect(screen, (255,0,0), cell_rect,1)
 
     if dragging_shovel:
         screen.blit(shovel_img,shovel_rect)
         for row in range(rows):
             for col in range(columns):
-                pygame.draw.rect(screen, (0,255,0), grid[row][col],1)
+                cell_rect = grid[row][col]
+                if grid_occupied[row][col] is None:
+                    pygame.draw.rect(screen, (0,255,0), cell_rect,1)
+                else:
+                    pygame.draw.rect(screen, (255,0,0), cell_rect,1)
 
     for sun_drop in sun:
         screen.blit(sun_image, (sun_drop[0], sun_drop[1]))
@@ -432,4 +501,4 @@ while True:
 
 
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(40)
