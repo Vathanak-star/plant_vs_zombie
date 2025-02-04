@@ -15,10 +15,34 @@ screen = pygame.display.set_mode((800,800))
 pygame.display.set_caption('Plant Vs Zombie')
 font = pygame.font.SysFont('comicsansms',20,bold=True)
 
+font1 = pygame.font.SysFont('comicsansms',13,bold=True)
+
 sun_count = 0
 sun_text = font.render(str(sun_count),True,(0,0,0))
 sunRect = sun_text.get_rect()
 sunRect.topleft = (35,67)
+
+#level text
+level_text = "Level: "
+level_text_show = font.render(level_text,True,(0,0,0))
+level_text_rect = level_text_show.get_rect()
+level_text_rect.bottomright = (695,30)
+
+level_count_text = 1
+level_count_text_show = font.render(str(level_count_text),True,(0,0,0))
+level_count_rect = level_count_text_show.get_rect()
+level_count_rect.bottomright = (700,30)
+
+#zombie To Kill
+zombie_text = "Zombies To Kill:"
+zombie_text_show = font1.render(zombie_text,True,(0,0,0))
+zombie_text_rect = zombie_text_show.get_rect()
+zombie_text_rect.bottomright = (715,50)
+
+zombie_count = 0
+zombie_count_text = font1.render(str(zombie_count),True,(0,0,0))
+zombie_count_rect = zombie_count_text.get_rect()
+zombie_count_rect.bottomright = (725,50)
  
 #Define Paths to the image
 base_dir = os.path.dirname(__file__)
@@ -180,12 +204,38 @@ clock = pygame.time.Clock()
 peashooter = Peashooter
 
 bullets = []
+bullets_to_remove = []
 
 #zombie
 normal_zombie_img = pygame.image.load(os.path.join(images_dir,'normal_zombie.png'))
 normal_zombie_img = pygame.transform.scale(normal_zombie_img,(70,70))
 
 normal_zombie = []
+
+level_transition = False
+level_start_time = pygame.time.get_ticks()
+
+LEVELS = {
+    1:{
+        "zombie_count" : 3,
+        "spawn_range": (0,5),
+        "spawn_chance": 40,
+    },
+    2:{
+        "zombie_count" : 6,
+        "spawn_range": (0,5),
+        "spawn_chance": 30,
+    },
+    3:{
+        "zombie_count" : 8,
+        "spawn_range": (0,5),
+        "spawn_chance": 20,
+    }
+}
+
+current_level = 1
+zombie_spawned = 0
+zombie_kill = 0
 
 while True:
     for event in pygame.event.get():
@@ -198,7 +248,6 @@ while True:
                 sun_rect = pygame.Rect(sun_drop[0] , sun_drop[1], 35, 35)
                 if sun_rect.collidepoint(mouse_pos):
                     sun_count = sun_count + 50
-                    print(sun_count)
                     sun.remove(sun_drop) 
                     x = random.randrange(0,800)
                     y = random.randrange(-50,-10)
@@ -219,7 +268,6 @@ while True:
                 if active_sun_rect.collidepoint(mouse_pos):
                     active_suns.remove(active_sun_drop)
                     sun_count = sun_count + 50
-                    print(sun_count)
                     sun_text = font.render(str(sun_count),True,(0,0,0))
                     sunRect = sun_text.get_rect()
                     if sun_count == 0:
@@ -233,7 +281,6 @@ while True:
             
             #peashooter
             if peashooter_card_rect.collidepoint(mouse_pos) and not dragging_peashooter:
-                print('Peashooter Clicked')
                 peashooter_rect.bottomright = (130,80)
                 if sun_count >= 100: 
                     dragging_peashooter = True
@@ -264,7 +311,6 @@ while True:
             #sunflower
 
             if sunflower_card_rect.collidepoint(mouse_pos) and not dragging_sunflower:
-                print('Sunflower Clicked')
                 sunflower_rect.bottomright = (220,80)
                 if sun_count >= 50:
                     dragging_sunflower = True
@@ -295,7 +341,6 @@ while True:
 
             #wallnut
             if wallnut_card_rect.collidepoint(mouse_pos) and not dragging_wallnut:
-                print('Wallnut Clicked')
                 wallnut_rect.bottomright = (280,80)
                 if sun_count >= 50:
                     dragging_wallnut = True
@@ -331,24 +376,25 @@ while True:
                 dragging_shovel = True
                 mouse_shovel_x, mouse_shovel_y = event.pos
             elif dragging_shovel:
+                clicked_cell = False
                 for row in range(rows):
                     for col in range(columns):
                         if grid[row][col].collidepoint(mouse_pos):
                             clicked_cell = True
                             if grid_occupied[row][col] is not None:
                                 plant_to_remove = grid_occupied[row][col]
-                                if plant_to_remove is not None:
-                                    if plant_to_remove in plants:
-                                        plants.remove(plant_to_remove)
-                                    grid_occupied[row][col] = None
-                                    dragging_shovel = False
-                                    shovel_rect.bottomright = (offset_shovel_x,offset_shovel_y)
-                                    break
-                    else:
-                        shovel_rect.bottomright = (offset_shovel_x,offset_shovel_y)
-                        dragging_shovel = False
+                                if plant_to_remove in plants:
+                                    plants.remove(plant_to_remove)
+                                grid_occupied[row][col] = None
+                            dragging_shovel = False
+                            shovel_rect.bottomright = (offset_shovel_x,offset_shovel_y)
+                            break
+                    if clicked_cell:
                         break
-                    break
+
+                if not clicked_cell:
+                    dragging_shovel = False
+                    shovel_rect.topleft = (550,3)
 
                                     
                                 
@@ -386,6 +432,12 @@ while True:
     screen.blit(shovel_card_img,shovel_card_rect)
     screen.blit(menu_card_img,menu_card_rect)
 
+    screen.blit(level_text_show,level_text_rect)
+    screen.blit(level_count_text_show,level_count_rect)
+
+    screen.blit(zombie_text_show,zombie_text_rect)
+    screen.blit(zombie_count_text,zombie_count_rect)
+
     current_time = pygame.time.get_ticks()
 
 
@@ -414,14 +466,53 @@ while True:
         bullet.move()
         bullet.show_ammo_img(screen)
 
-    if random.randint(0,50) == 0:
-        row = random.randint(0, rows-1)
 
-        cell_height = valid_area.height // rows
-        spawn_y = valid_area.y + row * cell_height + (cell_height - 115)
+    # if random.randint(0,80) == 0:
+    #     row = random.randint(0, rows-1)
 
-        spawn_x = valid_area.right
-        normal_zombie.append(NormalZombie(spawn_x,spawn_y,normal_zombie_img))
+    #     cell_height = valid_area.height // rows
+    #     spawn_y = valid_area.y + row * cell_height + (cell_height - 115)
+
+    #     spawn_x = valid_area.right
+    #     normal_zombie.append(NormalZombie(spawn_x,spawn_y,normal_zombie_img))
+
+    transiton_start_time = 0
+    if zombie_spawned >= LEVELS[current_level]["zombie_count"]:
+        if current_level < max(LEVELS.keys()):
+            level_transition = True
+            transiton_start_time = 0
+            print(f"Level {current_level} complete! Waiting for next level...")
+        else:
+            print("you win!")
+    if level_transition and zombie_kill == LEVELS[current_level]["zombie_count"]:
+        if pygame.time.get_ticks() - transiton_start_time >= 10000:
+            level_transition = False
+            current_level += 1
+            zombie_spawned = 0
+            level_start_time = pygame.time.get_ticks()
+            print(f"Start Level {current_level}")
+            level_count_text_show = font.render(str(current_level),True,(0,0,0))
+            level_count_rect.bottomright = (700,30)
+
+    if not level_transition:
+        current_times = pygame.time.get_ticks()
+        zombie_count_text = font1.render(f"{LEVELS[current_level]['zombie_count']}", True, (0,0,0))
+        screen.blit(zombie_count_text, zombie_count_rect)
+        level_data = LEVELS[current_level]
+        if (current_times - level_start_time > 10000 and
+            random.randint(0, level_data['spawn_chance']) == 0 and
+            zombie_spawned < level_data['zombie_count']):
+            min_rox, max_row = level_data["spawn_range"]
+            row = random.randint(min_rox, max_row)
+
+            cell_height = valid_area.height // rows
+            spawn_y = valid_area.y + row * cell_height + (cell_height - 115)
+
+            spawn_x = valid_area.right
+            normal_zombie.append(NormalZombie(spawn_x,spawn_y,normal_zombie_img))
+            zombie_spawned += 1
+            print(zombie_spawned)
+
 
     for zombie in normal_zombie:
         zombie.zombie_move()
@@ -432,8 +523,10 @@ while True:
             if zombie.x < bullet.x < zombie.x + zombie.width and zombie.y < bullet.y < zombie.y + zombie.height:
                 zombie.health -= 20
                 bullets.remove(bullet)
-                if zombie.health == 0:
+                if zombie.health <= 0:
                     normal_zombie.remove(zombie)
+                    zombie_kill = zombie_kill + 1
+                    print( "zomebie kill: " + str(zombie_kill))
                     break
 
     for zombie in normal_zombie:
@@ -442,14 +535,13 @@ while True:
             if zombie.rect.colliderect(plant.rect):
                 zombie.is_moving = False
                 plant.health -= 20
-                if plant.health == 0:
-                    plants.remove(plant)
+                if plant.health <= 0:
                     for row in range(rows):
                         for col in range(columns):
                             grid_occupied[row][col] = None
+                    plants.remove(plant)
                     zombie.is_moving = True
                 break
-
 
 
     if dragging_peashooter:
