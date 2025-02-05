@@ -7,17 +7,20 @@ from zombie.normal_zombie import NormalZombie
 import pygame
 import os
 import random
+import pygame_gui
 
 pygame.init()
 
+gameplay_screen = (800,800)
+
 #Set up screen
-screen = pygame.display.set_mode((800,800))
+screen = pygame.display.set_mode(gameplay_screen)
 pygame.display.set_caption('Plant Vs Zombie')
 font = pygame.font.SysFont('comicsansms',20,bold=True)
 
 font1 = pygame.font.SysFont('comicsansms',13,bold=True)
 
-sun_count = 0
+sun_count = 1000
 sun_text = font.render(str(sun_count),True,(0,0,0))
 sunRect = sun_text.get_rect()
 sunRect.topleft = (35,67)
@@ -179,6 +182,14 @@ columns = 9
 cell_width = valid_area.width // columns
 cell_height = valid_area.height // rows
 
+manager  = pygame_gui.UIManager(gameplay_screen)
+manager.preload_fonts([{
+    'name': 'noto_sans',
+    'point_size': 14,
+    'style': 'bold',
+    'antialiased': True  # or 'antialiased': '1' if you prefer exactly the string from the warning
+}])
+
 grid = []
 for row in range(rows):
     grid.append([])
@@ -219,17 +230,17 @@ LEVELS = {
     1:{
         "zombie_count" : 3,
         "spawn_range": (0,5),
-        "spawn_chance": 40,
+        "spawn_chance": 100,
     },
     2:{
         "zombie_count" : 6,
         "spawn_range": (0,5),
-        "spawn_chance": 30,
+        "spawn_chance": 100,
     },
     3:{
         "zombie_count" : 8,
         "spawn_range": (0,5),
-        "spawn_chance": 20,
+        "spawn_chance": 100,
     }
 }
 
@@ -237,11 +248,26 @@ current_level = 1
 zombie_spawned = 0
 zombie_kill = 0
 
+alert_dialog = False
+paused = False
+level_complete_start = None
+
 while True:
+    time_delta = clock.tick(40) / 1000.0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
+
+        manager.process_events(event)
+
+        # Listen for UI window close events:
+        if event.type == pygame_gui.UI_WINDOW_CLOSE:
+            # Check if the closed window is our alert dialog
+            if alert_dialog is not None and event.ui_element == alert_dialog:
+                paused = False  # resume game updates
+                alert_dialog = None
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = event.pos
             for sun_drop in sun[:]:
@@ -415,7 +441,8 @@ while True:
             mouse_shovel_x,mouse_shovel_y = event.pos
             shovel_rect.center = (mouse_shovel_x,mouse_shovel_y)
             
-
+    
+    manager.update(time_delta)
     screen.blit(background_image,(0,0))
     screen.blit(woodboard_img,woodboard_rect)
     screen.blit(sun_text,sunRect)
@@ -466,33 +493,71 @@ while True:
         bullet.move()
         bullet.show_ammo_img(screen)
 
-
-    # if random.randint(0,80) == 0:
-    #     row = random.randint(0, rows-1)
-
-    #     cell_height = valid_area.height // rows
-    #     spawn_y = valid_area.y + row * cell_height + (cell_height - 115)
-
-    #     spawn_x = valid_area.right
-    #     normal_zombie.append(NormalZombie(spawn_x,spawn_y,normal_zombie_img))
-
+    # Check for level completion and show the alert dialog if needed.
     transiton_start_time = 0
     if zombie_spawned >= LEVELS[current_level]["zombie_count"]:
         if current_level < max(LEVELS.keys()):
             level_transition = True
-            transiton_start_time = 0
-            print(f"Level {current_level} complete! Waiting for next level...")
+            if transiton_start_time == 0:
+                transiton_start_time = pygame.time.get_ticks()
+
+            if not alert_shown:
+                # Create an alert dialog using a message window
+                alert_dialog = pygame_gui.windows.UIMessageWindow(
+                    rect=pygame.Rect((250, 200), (300, 150)),
+                    html_message='<b>Level Completed</b><br>Welcome To New Level',
+                    manager=manager,
+                    window_title='Congratulations'
+                )
+                alert_shown = True
+            if pygame.time.get_ticks() - transiton_start_time >= 10000:
+                level_transition = False
+                current_level += 1
+                zombie_spawned = 0
+                zombie_kill = 0
+                level_start_time = pygame.time.get_ticks()
+                level_count_text_show = font.render(str(current_level), True, (0, 0, 0))
+                level_count_rect.bottomright = (700, 30)
+                # Reset the alert flag so that the next level can show a new dialog.
+                alert_shown = False
+                # Optionally, remove the dialog if needed.
         else:
-            print("you win!")
-    if level_transition and zombie_kill == LEVELS[current_level]["zombie_count"]:
-        if pygame.time.get_ticks() - transiton_start_time >= 10000:
-            level_transition = False
-            current_level += 1
-            zombie_spawned = 0
-            level_start_time = pygame.time.get_ticks()
-            print(f"Start Level {current_level}")
-            level_count_text_show = font.render(str(current_level),True,(0,0,0))
-            level_count_rect.bottomright = (700,30)
+            # If there are no more levels, you could show a win dialog or end the game.
+            if not alert_shown:
+                alert_dialog = pygame_gui.windows.UIMessageWindow(
+                    rect=pygame.Rect((250, 200), (300, 150)),
+                    html_message='<b>You Win!</b><br>Game Completed.',
+                    manager=manager,
+                    window_title='Congratulations'
+                )
+                alert_shown = True
+        if event.type == pygame_gui.UI_WINDOW_CLOSE:
+            if alert_dialog and event.ui_element == alert_dialog:
+                paused = False
+                alert_dialog = None
+                
+                if current_level < max(LEVELS.keys()):
+                    # Proceed to next level
+                    current_level += 1
+                    zombie_spawned = 0
+                    zombie_kill = 0
+                    level_start_time = pygame.time.get_ticks()
+                    level_count_text_show = font.render(str(current_level), True, (0, 0, 0))
+                    level_count_rect.bottomright = (700, 30)
+                    plants.clear()
+                    grid_occupied = [[None for _ in range(columns)] for _ in range(rows)]
+                    normal_zombie.clear()
+    
+    # if level_transition and zombie_kill == LEVELS[current_level]["zombie_count"]:
+    #     if pygame.time.get_ticks() - transiton_start_time >= 10000:
+    #         level_transition = False
+    #         current_level += 1
+    #         zombie_spawned = 0
+    #         level_start_time = pygame.time.get_ticks()
+    #         print(f"Start Level {current_level}")
+    #         level_count_text_show = font.render(str(current_level),True,(0,0,0))
+    #         level_count_rect.bottomright = (700,30)
+    #         manager.draw_ui(screen)
 
     if not level_transition:
         current_times = pygame.time.get_ticks()
@@ -591,6 +656,6 @@ while True:
             sun_drop[1] = random.randrange(-50,-10)
             sun_drop[0] = random.randrange(0,800)
 
-
+    manager.draw_ui(screen)
     pygame.display.flip()
-    clock.tick(40)
+    clock.tick(80)
