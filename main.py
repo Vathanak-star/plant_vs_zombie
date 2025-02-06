@@ -225,17 +225,17 @@ level_start_time = pygame.time.get_ticks()
 
 LEVELS = {
     1:{
-        "zombie_count" : 3,
+        "zombie_count" : 5,
         "spawn_range": (0,4),
         "spawn_chance": 100,
     },
     2:{
-        "zombie_count" : 6,
+        "zombie_count" : 10,
         "spawn_range": (0,4),
         "spawn_chance": 100,
     },
     3:{
-        "zombie_count" : 9,
+        "zombie_count" : 15,
         "spawn_range": (0,4),
         "spawn_chance": 100,
     }
