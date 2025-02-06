@@ -1,77 +1,63 @@
-import pygame
-import time
 import os
+import pygame
 
 class HomeScreen:
-
     def __init__(self):
-        
-        # Screen dimensions
+
+        # Screen Dimensions
         self.WIDTH, self.HEIGHT = 800, 600
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+        pygame.display.set_caption("Plants vs Zombies")
 
-        # Load and scale assets
-        self.background = pygame.image.load(os.path.join(os.path.dirname(__file__), "img", "1.png"))
-        self.background = pygame.transform.scale(self.background, (self.WIDTH, self.HEIGHT))
+        #Define Paths to the image
+        self.base_dir = os.path.dirname(__file__)
+        self.assets_dir = os.path.join(self.base_dir, 'assets')
+        self.images_dir = os.path.join(self.assets_dir, 'images')
 
-        self.logo = pygame.image.load(os.path.join(os.path.dirname(__file__), "img", "0.png"))
-        self.logo = pygame.transform.scale(self.logo, (100, 100))
+        # Load Background Image
+        self.background_image = pygame.image.load(os.path.join(self.images_dir, 'backgound_homepage.jpg')).convert()
+        self.background_image = pygame.transform.scale(self.background_image, (800, 600))
 
-        # Colors
-        self.WHITE = (255, 255, 255)
-        self.GREEN = (0, 200, 0)
-        self.BLACK = (0, 0, 0)
-        self.PINK = (255, 192, 203)  # RGB for pink
 
-    # Fonts
-        self.button_font = pygame.font.SysFont('tahoma', 40, bold=True)
+        # Load First Overlay Image (Button on Stone)
+        self.overlay1 = pygame.image.load(os.path.join(self.images_dir,"adventure_tomb.png")).convert_alpha()
+        self.overlay1 = pygame.transform.smoothscale(self.overlay1, (235, 217))  
+        self.overlay1_x, self.overlay1_y = 365, 118  
+        self.button1_rect = pygame.Rect(self.overlay1_x, self.overlay1_y, self.overlay1.get_width(), self.overlay1.get_height())
 
-    def main_menu(self):
-        """Main menu with quit button"""
-        # Create button
-        button_width, button_height = 110, 60
-        button = pygame.Rect(
-            (self.WIDTH - button_width) // 2,
-            (self.HEIGHT - button_height) // 2,
-            button_width,
-            button_height
-        )
+        # Load Second Overlay Image
+        self.overlay2 = pygame.image.load(os.path.join(self.images_dir,"exitgame_tomb.png")).convert_alpha()
+        self.overlay2 = pygame.transform.smoothscale(self.overlay2, (179, 170))  
+        self.overlay2_x, self.overlay2_y = 385, 240  
+        self.button2_rect = pygame.Rect(self.overlay2_x, self.overlay2_y, self.overlay2.get_width(), self.overlay2.get_height())
 
-        button_gameplay = pygame.Rect(
-            300,
-            360,
-            220,
-            60
-        )
+    # Function to move the first overlay up
+    def move_overlay1_up():
+        global overlay1_y, button1_rect
+        overlay1_y -= 80
+        button1_rect.y = overlay1_y
 
-        button_surface = self.button_font.render('Quit', True, self.WHITE)
-
-        button_surface_gameplay = self.button_font.render('Gameplay', True, self.WHITE)
-
+    def loadHomescreen(self):
+        # Main Loop
         running = True
         while running:
-            self.screen.fill(self.PINK)
-            
-            # Event handling
+            self.screen.blit(self.background_image, (0, 0))  
+            self.screen.blit(self.overlay1, (self.overlay1_x, self.overlay1_y))  
+            self.screen.blit(self.overlay2, (self.overlay2_x, self.overlay2_y))  
+
+            # Get Mouse Position
+            mouse_pos = pygame.mouse.get_pos()
+
+            # Event Handling
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if button.collidepoint(event.pos):
+                    pygame.quit()
+                    quit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.button1_rect.collidepoint(event.pos):
+                        running = False
+                    elif self.button2_rect.collidepoint(event.pos):
                         pygame.quit()
                         quit()
-                    if button_gameplay.collidepoint(event.pos):
-                        running = False
 
-            # Hover effect
-            mouse_pos = pygame.mouse.get_pos()
-            button_color = (180, 180, 180) if button.collidepoint(mouse_pos) else (110, 110, 110)
-            button_color_gameplay = (180, 180, 180) if button_gameplay.collidepoint(mouse_pos) else (110, 110, 110)
-            pygame.draw.rect(self.screen, button_color, button)
-            pygame.draw.rect(self.screen,button_color_gameplay,button_gameplay)
-            
-            # Draw button text
-            self.screen.blit(button_surface, (button.x + 5, button.y + 5))
-            self.screen.blit(button_surface_gameplay, (button_gameplay.x + 5, button_gameplay.y + 5))
-            
             pygame.display.flip()
