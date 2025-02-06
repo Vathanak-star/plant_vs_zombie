@@ -7,6 +7,7 @@ from zombie.normal_zombie import NormalZombie
 import pygame
 import os
 import random
+import pygame_gui
 
 pygame.init()
 
@@ -202,7 +203,7 @@ grid_occupied = [[None for _ in range(columns)] for _ in range(rows)]
 
 sun = []
 for i in range(1):
-    x = random.randrange(0,800)
+    x = random.randrange(20,780)
     y = random.randrange(-50,-10)
     sun.append([x,y])
 
@@ -224,17 +225,17 @@ level_start_time = pygame.time.get_ticks()
 
 LEVELS = {
     1:{
-        "zombie_count" : 1,
+        "zombie_count" : 3,
         "spawn_range": (0,4),
         "spawn_chance": 100,
     },
     2:{
-        "zombie_count" : 1,
+        "zombie_count" : 6,
         "spawn_range": (0,4),
         "spawn_chance": 100,
     },
     3:{
-        "zombie_count" : 1,
+        "zombie_count" : 9,
         "spawn_range": (0,4),
         "spawn_chance": 100,
     }
@@ -245,12 +246,24 @@ zombie_spawned = 0
 zombie_kill = 0
 
 gamplay_running = True
+window_size = (800,800)
+manager = pygame_gui.UIManager(window_size)
+alert_shown = False
 
 while gamplay_running:
+    time_delta = clock.tick(40) / 1000.0 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
+
+        if alert_shown and event.type == pygame_gui.UI_WINDOW_CLOSE and event.ui_element == alert_dialog and current_level == 3:
+            screen = pygame.display.set_mode((800,600))
+            pygame.display.set_caption('Plant Vs Zombie')
+            gamplay_running = False
+            manager.process_events(event)
+
+        manager.process_events(event)
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = event.pos
             for sun_drop in sun[:]:
@@ -439,7 +452,6 @@ while gamplay_running:
     screen.blit(lawn_car_img,lawn_car_rect5)
 
     screen.blit(shovel_card_img,shovel_card_rect)
-    screen.blit(menu_card_img,menu_card_rect)
 
     screen.blit(level_text_show,level_text_rect)
     screen.blit(level_count_text_show,level_count_rect)
@@ -448,6 +460,7 @@ while gamplay_running:
     screen.blit(zombie_count_text,zombie_count_rect)
 
     current_time = pygame.time.get_ticks()
+    manager.update(time_delta)
 
 
 
@@ -480,11 +493,23 @@ while gamplay_running:
         if current_level < max(LEVELS.keys()):
             level_transition = True
             transiton_start_time = 0
+            if not alert_shown:
+                alert_dialog = pygame_gui.windows.UIMessageWindow(
+                    rect=pygame.Rect((250, 200), (300, 150)),
+                    html_message='<b>Level Completed</b><br>Welcome To New Level',
+                    manager=manager,
+                    window_title='Congratulations'
+                )
+                alert_shown = True
         else:
-            print("you win!")
-            gamplay_running = False
-            screen = pygame.display.set_mode((800,600))
-            pygame.display.set_caption('Plant Vs Zombie')
+            if not alert_shown:
+                alert_dialog = pygame_gui.windows.UIMessageWindow(
+                    rect=pygame.Rect((250, 200), (300, 150)),
+                    html_message='<b>You Win!</b><br>Game Completed.',
+                    manager=manager,
+                    window_title='Congratulations'
+                )
+                alert_shown = True
     if level_transition and zombie_kill == LEVELS[current_level]["zombie_count"]:
         if pygame.time.get_ticks() - transiton_start_time >= 10000:
             zombie_kill = 0
@@ -497,7 +522,9 @@ while gamplay_running:
             level_count_rect.bottomright = (700,30)
             plants.clear()
             grid_occupied = [[None for _ in range(columns)] for _ in range(rows)]
+            bullets.clear()
             normal_zombie.clear()
+            alert_shown = False
 
     if not level_transition:
         current_times = pygame.time.get_ticks()
@@ -598,9 +625,9 @@ while gamplay_running:
             sun_drop[1] = random.randrange(-50,-10)
             sun_drop[0] = random.randrange(0,800)
 
-
+    manager.draw_ui(screen)
     pygame.display.flip()
-    clock.tick(40)
+    clock.tick(60)
 
 loading.loading_screen()
 home.loadHomescreen()
