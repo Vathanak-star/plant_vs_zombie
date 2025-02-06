@@ -271,7 +271,7 @@ while gamplay_running:
                 if sun_rect.collidepoint(mouse_pos):
                     sun_count = sun_count + 50
                     sun.remove(sun_drop) 
-                    x = random.randrange(0,800)
+                    x = random.randrange(20,780)
                     y = random.randrange(-50,-10)
                     sun.append([x,y])
                     sun_text = font.render(str(sun_count),True,(0,0,0))
@@ -524,6 +524,11 @@ while gamplay_running:
             grid_occupied = [[None for _ in range(columns)] for _ in range(rows)]
             bullets.clear()
             normal_zombie.clear()
+            sun_count = 0
+            sun_text = font.render(str(sun_count),True,(0,0,0))
+            sunRect = sun_text.get_rect()
+            if sun_count == 0:
+                sunRect.topleft = (35,67)
             alert_shown = False
 
     if not level_transition:

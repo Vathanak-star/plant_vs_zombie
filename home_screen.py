@@ -15,19 +15,19 @@ class HomeScreen:
         self.images_dir = os.path.join(self.assets_dir, 'images')
 
         # Load Background Image
-        self.background_image = pygame.image.load(os.path.join(self.images_dir, 'backgound_homepage.jpg')).convert()
+        self.background_image = pygame.image.load(os.path.join(self.images_dir, 'bg2.png')).convert()
         self.background_image = pygame.transform.scale(self.background_image, (800, 600))
 
 
         # Load First Overlay Image (Button on Stone)
         self.overlay1 = pygame.image.load(os.path.join(self.images_dir,"adventure_tomb.png")).convert_alpha()
-        self.overlay1 = pygame.transform.smoothscale(self.overlay1, (235, 217))  
-        self.overlay1_x, self.overlay1_y = 365, 118  
+        self.overlay1 = pygame.transform.smoothscale(self.overlay1, (215, 217))  
+        self.overlay1_x, self.overlay1_y = 375, 88
         self.button1_rect = pygame.Rect(self.overlay1_x, self.overlay1_y, self.overlay1.get_width(), self.overlay1.get_height())
 
         # Load Second Overlay Image
         self.overlay2 = pygame.image.load(os.path.join(self.images_dir,"exitgame_tomb.png")).convert_alpha()
-        self.overlay2 = pygame.transform.smoothscale(self.overlay2, (179, 170))  
+        self.overlay2 = pygame.transform.smoothscale(self.overlay2, (167, 170))  
         self.overlay2_x, self.overlay2_y = 385, 240  
         self.button2_rect = pygame.Rect(self.overlay2_x, self.overlay2_y, self.overlay2.get_width(), self.overlay2.get_height())
 
