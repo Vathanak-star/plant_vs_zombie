@@ -179,6 +179,16 @@ while True:
     menu_card_rect = menu_card_img.get_rect()
     menu_card_rect.topleft = (740,3)
 
+    #home_page and quit button
+    home_button_img = pygame.image.load(os.path.join(images_dir,'homepage_button.png')).convert_alpha()
+    home_button_img = pygame.transform.scale(home_button_img,(70,70))
+    home_button_rect = home_button_img.get_rect()
+    home_button_rect.topleft = (650,730)
+
+    quit_button_img = pygame.image.load(os.path.join(images_dir,'quitgame_button.png')).convert_alpha()
+    quit_button_img = pygame.transform.scale(quit_button_img,(70,70))
+    quit_button_rect = quit_button_img.get_rect()
+    quit_button_rect.topleft = (720,730)
 
     #doing row and colunms to create cell
     valid_area = pygame.Rect(50,100,740,700)
@@ -258,6 +268,7 @@ while True:
                 pygame.quit()
                 quit()
 
+
             if alert_shown and event.type == pygame_gui.UI_WINDOW_CLOSE and event.ui_element == alert_dialog and current_level == 3:
                 screen = pygame.display.set_mode((800,600))
                 pygame.display.set_caption('Plant Vs Zombie')
@@ -267,6 +278,14 @@ while True:
             manager.process_events(event)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
+
+                if home_button_rect.collidepoint(mouse_pos):
+                    gamplay_running = False
+
+                if quit_button_rect.collidepoint(mouse_pos):
+                    pygame.quit()
+                    quit()
+
                 for sun_drop in sun[:]:
                     sun_rect = pygame.Rect(sun_drop[0] , sun_drop[1], 35, 35)
                     if sun_rect.collidepoint(mouse_pos):
@@ -459,6 +478,8 @@ while True:
 
         screen.blit(zombie_text_show,zombie_text_rect)
         screen.blit(zombie_count_text,zombie_count_rect)
+        screen.blit(home_button_img,home_button_rect)
+        screen.blit(quit_button_img,quit_button_rect)
 
         current_time = pygame.time.get_ticks()
         manager.update(time_delta)
