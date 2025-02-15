@@ -10,7 +10,7 @@ class Peashooter:
         self.ammo_img = ammo_img
         self.last_shot_time = 0
         self.shot_cooldown = 1000
-        self.health = 100
+        self.health = 5000
         self.rect = pygame.Rect (x,y,70,70)
 
     def show_peashooter_img(self,screen):

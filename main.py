@@ -48,6 +48,12 @@ while True:
     zombie_text_rect = zombie_text_show.get_rect()
     zombie_text_rect.bottomright = (715,50)
 
+    #zombie To Killed
+    zombie_text1 = "Zombies Killed:"
+    zombie_text_show1 = font1.render(zombie_text1,True,(0,0,0))
+    zombie_text_rect1 = zombie_text_show1.get_rect()
+    zombie_text_rect1.bottomright = (710,70)
+
     zombie_count = 0
     zombie_count_text = font1.render(str(zombie_count),True,(0,0,0))
     zombie_count_rect = zombie_count_text.get_rect()
@@ -255,6 +261,9 @@ while True:
     current_level = 1
     zombie_spawned = 0
     zombie_kill = 0
+    zombie_killed_text = font1.render(str(zombie_kill),True,(255,0,0))
+    zombie_killed_rect = zombie_killed_text.get_rect()
+    zombie_killed_rect.bottomright = (725,70)
 
     gamplay_running = True
     window_size = (800,800)
@@ -478,6 +487,8 @@ while True:
 
         screen.blit(zombie_text_show,zombie_text_rect)
         screen.blit(zombie_count_text,zombie_count_rect)
+        screen.blit(zombie_text_show1,zombie_text_rect1)
+        screen.blit(zombie_killed_text,zombie_killed_rect)
         screen.blit(home_button_img,home_button_rect)
         screen.blit(quit_button_img,quit_button_rect)
 
@@ -535,6 +546,8 @@ while True:
         if level_transition and zombie_kill == LEVELS[current_level]["zombie_count"]:
             if pygame.time.get_ticks() - transiton_start_time >= 10000:
                 zombie_kill = 0
+                zombie_killed_text = font1.render(str(zombie_kill),True,(255,0,0))
+                zombie_killed_rect.bottomright = (725,70)
                 level_transition = False
                 current_level += 1
                 zombie_spawned = 0
@@ -587,6 +600,8 @@ while True:
                     if zombie.health <= 0:
                         normal_zombie.remove(zombie)
                         zombie_kill = zombie_kill + 1
+                        zombie_killed_text = font1.render(str(zombie_kill),True,(255,0,0))
+                        zombie_killed_rect.bottomright = (725,70)
                         print( "zomebie kill: " + str(zombie_kill))
                         break
 

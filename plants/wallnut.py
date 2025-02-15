@@ -5,7 +5,7 @@ class Wallnut:
         self.x = x
         self.y = y
         self.wallnut_img = wallnut_img
-        self.health = 20000
+        self.health = 10000
         self.rect = pygame.Rect (x,y,70,70)
     
     def show_wallnut_img(self,screen):

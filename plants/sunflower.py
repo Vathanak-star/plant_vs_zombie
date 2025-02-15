@@ -10,7 +10,7 @@ class Sunflower:
         self.last_sun_time = 0
         self.sun_cooldown = 5000
         self.fall_range = 70
-        self.health = 10000
+        self.health = 5000
         self.rect = pygame.Rect (x,y,70,70)
 
     def show_sunflower_img(self,screen):
