@@ -489,8 +489,6 @@ while True:
         screen.blit(zombie_count_text,zombie_count_rect)
         screen.blit(zombie_text_show1,zombie_text_rect1)
         screen.blit(zombie_killed_text,zombie_killed_rect)
-        screen.blit(home_button_img,home_button_rect)
-        screen.blit(quit_button_img,quit_button_rect)
 
         current_time = pygame.time.get_ticks()
         manager.update(time_delta)
@@ -666,6 +664,9 @@ while True:
             if sun_drop[1] > 800:
                 sun_drop[1] = random.randrange(-50,-10)
                 sun_drop[0] = random.randrange(0,800)
+
+        screen.blit(home_button_img,home_button_rect)
+        screen.blit(quit_button_img,quit_button_rect)
 
         manager.draw_ui(screen)
         pygame.display.flip()
