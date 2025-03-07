@@ -4,14 +4,30 @@ from plants.peashooter import Peashooter
 from plants.sunflower import Sunflower
 from plants.wallnut import Wallnut
 from zombie.normal_zombie import NormalZombie
+from pydub import AudioSegment
 import pygame
 import os
 import random
 import pygame_gui
 
+audio1 = AudioSegment.from_file("music\cat goes to work.mp3")
+audio2 = AudioSegment.from_file("music\像晴天像雨天（电视剧《难哄》心动曲）.mp3")
+
+mixed_audio = audio1.overlay(audio2)
+mixed_audio.export("mxied_music.mp3", format="mp3")
+
 pygame.init()
 
+pygame.mixer.music.load('mxied_music.mp3')
+pygame.mixer.music.play(-1)
+
 while True:
+    # for event in pygame.event.get():
+    #     if event.type == pygame.QUIT:
+    #         pygame.quit()
+    
+
+
     loading = LoadingScreen()
     home = HomeScreen()
 
